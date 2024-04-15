@@ -6,18 +6,18 @@ from datetime import date, timedelta, datetime
 from PIL import Image, ImageDraw, ImageFont
 from selenium import webdriver
 from selenium.webdriver import FirefoxProfile, Keys
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 # arg1 = twitch username, arg2 = firefox profile path, arg3 = geckodriver path
 
 def init_selenium():
     options = Options()
-    # options.add_argument('-headless')
+    options.add_argument('-headless')
     options.profile = FirefoxProfile(sys.argv[2])
     options.binary_location = r'C:\Program Files\Mozilla Firefox\firefox.exe'
     driver = webdriver.Firefox(service=Service(sys.argv[3]), options=options)
@@ -123,7 +123,7 @@ def schedule_video(driver, thumbnail_location, vod_date):
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, id_notify_subs))).click()
 
     # thumbnail
-    driver.find_element(By.ID, id_upload_tn).send_keys(thumbnail_location)
+    driver.find_element(By.ID, id_upload_tn).send_keys(os.path.join(os.getcwd(), thumbnail_location))
 
     # playlist
     driver.find_element(By.CSS_SELECTOR, cs_playlists).click()
@@ -157,7 +157,7 @@ def main():
 
     vod_date = export_recent_vod(sel_driver)
     create_thumbnail(thumbnail_base, thumbnail_output, vod_date)
-    schedule_video(sel_driver, os.getcwd() + '\\' + thumbnail_output, vod_date)
+    schedule_video(sel_driver, thumbnail_output, vod_date)
 
     sel_driver.close()
 
