@@ -3,7 +3,7 @@ import sys
 import time
 from datetime import date, timedelta, datetime
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from selenium import webdriver
 from selenium.webdriver import FirefoxProfile, Keys
 from selenium.webdriver.common.by import By
@@ -37,7 +37,7 @@ def export_recent_vod(driver):
 
     driver.get(f'https://dashboard.twitch.tv/u/{sys.argv[1]}/content/video-producer')
     date_text = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, cs_date))).text
-    date_converted = datetime.strptime(date_text, '%B %d, %Y').strftime('%#m/%#d/%Y')
+    date_converted = datetime.strptime(date_text, '%B %d, %Y').strftime('%#m/%#d/%y')
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, cs_hamburger))).click()
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, cs_export))).click()
     title = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, id_title)))
@@ -51,14 +51,26 @@ def export_recent_vod(driver):
 
 
 def draw_text(image, text, size, y_offset):
-    draw = ImageDraw.Draw(image)
     font = ImageFont.truetype(r'C:\Windows\Fonts\segoeuib.ttf', size)
     x = image.width / 2
     y = image.height / 2
-    fill = (255, 255, 255)
-    stroke_fill = (0, 0, 0)
+    transparent = (0, 0, 0, 0)
+    white = (255, 255, 255)
+    black = (0, 0, 0)
     stroke_width = 4
-    draw.text((x, y + y_offset), text, fill=fill, align='center', font=font, anchor='mm', stroke_fill=stroke_fill,
+    ds_offset = 3
+
+    # drop shadow
+    ds_image = Image.new('RGBA', (image.width, image.height), transparent)
+    ds_draw = ImageDraw.Draw(ds_image)
+    ds_draw.text((x + ds_offset, y + ds_offset + y_offset), text, fill=black, align='center', font=font, anchor='mm',
+                 stroke_fill=black, stroke_width=stroke_width)
+    ds_image = ds_image.filter(ImageFilter.GaussianBlur(3))
+    image.paste(ds_image, (0, 0), ds_image)
+
+    # regular text
+    draw = ImageDraw.Draw(image)
+    draw.text((x, y + y_offset), text, fill=white, align='center', font=font, anchor='mm', stroke_fill=black,
               stroke_width=stroke_width)
 
 
