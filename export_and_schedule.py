@@ -25,7 +25,7 @@ def init_selenium():
 
 
 def export_recent_vod(driver):
-    print('Exporting most recent Twitch VOD to YouTube... ', end='')
+    print('Exporting most recent Twitch VOD to YouTube... ', end='', flush=True)
     cs_date = ('div.iqUbUe:nth-child(1) > div:nth-child(1) > div:nth-child(2) > a:nth-child(1) > div:nth-child(1) > '
                'div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > '
                'div:nth-child(1)')
@@ -85,7 +85,7 @@ def create_thumbnail(base, output, date_string):
 
 
 def schedule_video(driver, thumbnail_location, vod_date):
-    print('Scheduling YouTube VOD...')
+    print('Scheduling YouTube VOD... ', end='', flush=True)
     id_content = 'menu-item-1'
     cs_top_row = ('ytcp-video-row.style-scope:nth-child(3) > div:nth-child(1) > div:nth-child(2) > '
                   'ytcp-video-list-cell-video:nth-child(1) > div:nth-child(2) > h3:nth-child(1) > a:nth-child(1) > '
@@ -117,7 +117,7 @@ def schedule_video(driver, thumbnail_location, vod_date):
     WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, id_content))).click()
     first_fail = True
     while True:
-        top_row = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, cs_top_row)))
+        top_row = WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CSS_SELECTOR, cs_top_row)))
         recent_title = top_row.text
         if vod_date in recent_title:
             top_row.click()
